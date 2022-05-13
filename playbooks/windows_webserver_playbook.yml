@@ -1,0 +1,48 @@
+
+---
+- hosts: windows
+  vars:
+    globomantics_site_path: "c:\\inetpub\\wwwroot\\globosite"
+    default_index_file: "./index.html"
+
+  tasks:
+    - name: ensure iis is installed
+      win_feature:
+        name: "Web-Server"
+        state: present
+        restart: no
+        include_sub_features: no
+        include_management_tools: no
+
+    - name: ensure the globomantics website directory is created
+      win_file:
+        path: "{{ globomantics_site_path }}"
+        state: directory
+
+
+    - name: delete default IIS website
+      win_iis_website:
+        name: "Default Web Site"
+        state: absent
+
+    - name: create sub iis website
+      win_iis_website:
+        name: "Globomantics Application"
+        state: started
+        post: 8080
+        physical_path: "{{ globomantics_site_path }}"
+
+    - name: copy default index file to site
+      win_copy:
+        src: "{{ default_index_file }}"
+        dest: "{{ globomantics_site_path }}\\index.html"
+
+    - name: ensure firewall rule is in place for site
+      win_firewall_rule: 
+        name: Globomantics
+        enabled: yes
+        state: present
+        localport: 8080
+        action: allow
+        direction: in
+        protocol: tcp

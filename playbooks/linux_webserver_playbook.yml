@@ -1,0 +1,9 @@
+
+---
+- hosts: linux
+  become: true
+  tasks:
+    - name: "ensure apache is installed"
+      yum:
+        name: httpd
+        state: latest

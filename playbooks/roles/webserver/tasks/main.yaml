@@ -1,0 +1,40 @@
+---
+- name: ensure iis is installed
+  win_feature:
+    name: "Web-Server"
+    state: present
+    restart: no
+    include_sub_features: no
+    include_management_tools: no
+
+- name: ensure the globomantics website directory is created
+  win_file:
+    path: "{{ globomantics_site_path }}"
+    state: directory
+    
+- name: delete default IIS website
+  win_iis_website:
+    name: "Default Web Site"
+    state: absent
+
+- name: create sub iis website
+  win_iis_website:
+    name: "Globomantics Application"
+    state: started
+    post: 8080
+    physical_path: "{{ globomantics_site_path }}"
+
+- name: template index file for hostname
+  template:
+    src: index.j2
+    dest: "{{ globomantics_site_path }}\\index.html"
+
+- name: ensure firewall rule is in place for site
+  win_firewall_rule: 
+    name: Globomantics
+    enabled: yes
+    state: present
+    localport: 8080
+    action: allow
+    direction: in
+    protocol: tcp
