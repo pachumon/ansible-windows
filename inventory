@@ -1,8 +1,8 @@
 [webservers]
-10.0.0.11
+10.0.0.6
 
 [dbservers]
-10.0.0.10
+10.0.0.7
 
 [windows:children]
 webservers
